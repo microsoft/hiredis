@@ -4,3 +4,9 @@
 /*.so
 /*.dylib
 /*.a
+/*.pc
+/*.sdf
+/*.opensdf
+/*.suo
+/x64
+/Win32
