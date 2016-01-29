@@ -20,13 +20,14 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+#ifndef WIN32_INTEROPA_PORTABILITY_H
+#define WIN32_INTEROPA_PORTABILITY_H
+
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
 
 /*  Sometimes in the Windows port we make changes from:
         antirez_redis_statement();
@@ -65,18 +66,15 @@ extern "C"
 #define IF_WIN32(x, y) x
 #define WIN32_ONLY(x) x
 #define POSIX_ONLY(x)
+#define inline __inline
 #else
 #define IF_WIN32(x, y) y
 #define WIN32_ONLY(x)
 #define POSIX_ONLY(x) x
 #endif
 
-
-/* Converts error codes returned by GetLastError/WSAGetLastError to errno codes */
-int translate_sys_error(int sys_error);
-
-void set_errno_from_last_error();
-
 #ifdef __cplusplus
 }
+#endif
+
 #endif

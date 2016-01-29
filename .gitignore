@@ -5,8 +5,11 @@
 /*.dylib
 /*.a
 /*.pc
-/*.sdf
-/*.opensdf
-/*.suo
-/x64
-/Win32
+*.sdf
+*.opensdf
+*.suo
+*.filters
+*.user
+*x64
+*x86
+*Win32

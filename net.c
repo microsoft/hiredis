@@ -58,6 +58,7 @@
 #include "net.h"
 #include "sds.h"
 #ifdef _WIN32
+  #include "win32_hiredis.h"
   #include "mstcpip.h"
 #endif
 
@@ -158,16 +159,15 @@ int redisKeepAlive(redisContext *c, int interval) {
         settings.keepalivetime = interval*1000;
         settings.keepaliveinterval = interval*1000/3;
         overlapped.hEvent = NULL;
-        WSAIoctl(
-            fd,
-            SIO_KEEPALIVE_VALS,
-            &settings,
-            sizeof(struct tcp_keepalive),
-            NULL,
-            0,
-            &bytesReturned,
-            &overlapped,
-            NULL);
+        FDAPI_WSAIoctl(fd,
+                       SIO_KEEPALIVE_VALS,
+                       &settings,
+                       sizeof(struct tcp_keepalive),
+                       NULL,
+                       0,
+                       &bytesReturned,
+                       &overlapped,
+                       NULL);
     }
 #else
     val = interval;
@@ -233,7 +233,7 @@ static int redisContextWaitReady(redisContext *c, const struct timeval *timeout)
     if (errno == EINPROGRESS) {
         int res;
 
-        if ((res = poll(wfd, 1, (int) msec)) == -1) {                           /* WIN_PORT_FIX: cast (int) */
+        if ((res = poll(wfd, 1, (int) msec)) == -1) {                           WIN_PORT_FIX /* cast (int) */
             __redisSetErrorFromErrno(c, REDIS_ERR_IO, "poll(2)");
             redisContextCloseFd(c);
             return REDIS_ERR;
@@ -288,15 +288,15 @@ int redisContextSetTimeout(redisContext *c, const struct timeval tv) {
 #ifdef _WIN32
 
 int redisContextPreConnectTcp(
-    redisContext *c,
-    const char *addr,
+    redisContext *c, 
+    const char *addr, 
     int port,
-    struct timeval *timeout,
+    struct timeval *timeout, 
     SOCKADDR_STORAGE* ss) {
     int blocking = (c->flags & REDIS_BLOCK);
 
     if (ParseStorageAddress(addr, port, ss) == FALSE) {
-        DebugBreak();
+        return REDIS_ERR;
     }
 
     if (REDIS_OK != redisCreateSocket(c, ss->ss_family)) {

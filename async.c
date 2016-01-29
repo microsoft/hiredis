@@ -28,13 +28,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
+#ifdef _WIN32
+#include "win32_hiredis.h"
+#include "msvs/win32_interop/win32_wsiocp2.h"
+#endif
 #include "fmacros.h"
 #include <stdlib.h>
 #include <string.h>
-#ifndef _WIN32
-#include <strings.h>
-#endif
+POSIX_ONLY(#include <strings.h>)
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -79,8 +80,8 @@ static unsigned int callbackHash(const void *key) {
 }
 
 static void *callbackValDup(void *privdata, const void *src) {
-    ((void) privdata);
     redisCallback *dup = malloc(sizeof(*dup));
+    ((void) privdata);
     memcpy(dup,src,sizeof(*dup));
     return dup;
 }
@@ -162,13 +163,13 @@ static void __redisAsyncCopyError(redisAsyncContext *ac) {
     ac->errstr = c->errstr;
 }
 
-#ifdef WIN32_IOCP
+#ifdef _WIN32
 redisAsyncContext *redisAsyncConnect(const char *ip, int port) {
     SOCKADDR_STORAGE ss;
     redisContext *c = redisPreConnectNonBlock(ip, port, &ss);
     redisAsyncContext *ac = redisAsyncInitialize(c);
-    if (aeWinSocketConnect(ac->c.fd, &ss) != 0) {
-         ac->c.err = errno;
+    if (WSIOCP_SocketConnect(ac->c.fd, &ss) != 0) {
+        ac->c.err = errno;
         strerror_r(errno, ac->c.errstr, sizeof(ac->c.errstr));
     }
     __redisAsyncCopyError(ac);
@@ -179,7 +180,7 @@ redisAsyncContext *redisAsyncConnectBind(const char *ip, int port, const char *s
     SOCKADDR_STORAGE ss;
     redisContext *c = redisPreConnectNonBlock(ip, port, &ss);
     redisAsyncContext *ac = redisAsyncInitialize(c);
-    if (aeWinSocketConnectBind(ac->c.fd, &ss, source_addr) != 0) {
+    if (WSIOCP_SocketConnectBind(ac->c.fd, &ss, source_addr) != 0) {
         ac->c.err = errno;
         strerror_r(errno, ac->c.errstr, sizeof(ac->c.errstr));
     }
@@ -206,7 +207,7 @@ redisAsyncContext *redisAsyncConnect(const char *ip, int port) {
 }
 
 redisAsyncContext *redisAsyncConnectBind(const char *ip, int port,
-                                         const char *source_addr) {
+    const char *source_addr) {
     redisContext *c = redisConnectBindNonBlock(ip,port,source_addr);
     redisAsyncContext *ac = redisAsyncInitialize(c);
     __redisAsyncCopyError(ac);
@@ -560,7 +561,7 @@ void redisAsyncHandleRead(redisAsyncContext *ac) {
         /* Always re-schedule reads */
 #ifdef _WIN32
         // There appears to be a bug in the Linux version of _EL_ADD_READ which will not reschedule
-        // the read if already reading. This is a problem if there is a large number of async GET
+        // the read if already reading. This is a problem if there is a large number of async GET 
         // operations. If the receive buffer is exhausted with the data returned, the read would
         // not be rescheduled, and the async operations would cease. This forces the read to recur.
         _EL_FORCE_ADD_READ(ac);

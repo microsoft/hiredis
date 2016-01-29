@@ -42,9 +42,9 @@
 #include "hiredis.h"
 #include "net.h"
 #include "sds.h"
+
 #ifdef _WIN32
-  #include "win32_util.h"
-  #include "win32fixes.h"
+#include "win32_hiredis.h"
 #endif
 
 static redisReply *createReplyObject(int type);
@@ -405,7 +405,7 @@ static int processBulkItem(redisReader *r) {
     if (s != NULL) {
         p = r->buf+r->pos;
         bytelen = (int)(s-(r->buf+r->pos)+2); /* include \r\n */
-        len = readLongLong(p);
+        len = (PORT_LONG) readLongLong(p);                                      WIN_PORT_FIX /* cast (PORT_LONG) */
 
         if (len < 0) {
             /* The nil object can always be created. */
@@ -416,7 +416,7 @@ static int processBulkItem(redisReader *r) {
             success = 1;
         } else {
             /* Only continue when the buffer contains the entire bulk item. */
-            bytelen += (PORT_ULONG) len+2; /* include \r\n */
+            bytelen += (PORT_ULONG) len + 2; /* include \r\n */
             if (r->pos+bytelen <= r->len) {
                 if (r->fn && r->fn->createString)
                     obj = r->fn->createString(cur,s+2,(size_t)len);
@@ -460,7 +460,7 @@ static int processMultiBulkItem(redisReader *r) {
     }
 
     if ((p = readLine(r,NULL)) != NULL) {
-        elements = readLongLong(p);
+        elements = (PORT_LONG) readLongLong(p);                                 WIN_PORT_FIX /* cast (PORT_LONG) */
         root = (r->ridx == 0);
 
         if (elements == -1) {
@@ -1007,8 +1007,9 @@ static redisContext *redisContextInit(void) {
 }
 
 void redisFree(redisContext *c) {
-    if (c->fd > 0)
+    if (c->fd > 0) {
         close(c->fd);
+    }
     if (c->obuf != NULL)
         sdsfree(c->obuf);
     if (c->reader != NULL)

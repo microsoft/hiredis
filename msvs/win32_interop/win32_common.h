@@ -20,45 +20,11 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "win32_types.h"
+#ifndef WIN32_INTEROP_COMMON_H
+#define WIN32_INTEROP_COMMON_H
 
-#include "Win32_variadicFunctor.h"
+#include <Windows.h>
 
-#include <windows.h>
-#include <stdexcept>
-#include <map>
-using namespace std;
+bool IsWindowsVersionAtLeast(WORD wMajorVersion, WORD wMinorVersion, WORD wServicePackMajor);
 
-DLLMap& DLLMap::getInstance() {
-	static DLLMap    instance; // Instantiated on first use. Guaranteed to be destroyed.
-	return instance;
-}
-
-DLLMap::DLLMap() { };
-
-LPVOID DLLMap::getProcAddress(string dll, string functionName)
-{
-	if (find(dll) == end()) {
-		HMODULE mod = LoadLibraryA(dll.c_str());
-		if (mod == NULL) {
-			throw system_error(GetLastError(), system_category(), "LoadLibrary failed");
-		}
-		(*this)[dll] = mod;
-	}
-
-	HMODULE mod = (*this)[dll];
-	LPVOID fp = GetProcAddress(mod, functionName.c_str());
-	if (fp == nullptr) {
-		throw system_error(GetLastError(), system_category(), "LoadLibrary failed");
-	}
-
-	return fp;
-}
-
-DLLMap::~DLLMap()
-{
-	for each(auto modPair in (*this))
-	{
-		FreeLibrary(modPair.second);
-	}
-}
+#endif

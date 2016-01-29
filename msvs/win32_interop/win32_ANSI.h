@@ -19,19 +19,25 @@
 * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#pragma once
-#include <cstdint>
-#include <stdio.h>
 
-int crt_pipe(int *pfds, unsigned int psize, int textmode);
-int crt_close(int fd);
-int crt_read(int fd, void *buffer, unsigned int count);
-int crt_write(int fd, const void *buffer, unsigned int count);
-int crt_open(const char *filename, int oflag, int pmode);
-int crt_open_osfhandle(intptr_t osfhandle, int flags);
-intptr_t crtget_osfhandle(int fd);
-int crtsetmode(int fd, int mode);
-size_t crtfwrite(const void * _Str, size_t _Size, size_t _Count, FILE * _File);
-int crt_isatty(int fd);
-int crt_access(const char *pathname, int mode);
-__int64 crt_lseek64(int fd, __int64 offset, int origin);
+
+#ifndef WIN32_INTEROPA_ANSI_H
+#define WIN32_INTEROPA_ANSI_H
+
+#include <Windows.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+    BOOL ParseAndPrintANSIString(HANDLE hDev, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten);
+    void ANSI_printf(char *format, ...);
+
+    // include this file after stdio.h in order to redirect printf to the one that supports ANSI escape sequences
+#define printf ANSI_printf
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
