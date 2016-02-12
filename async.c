@@ -47,11 +47,6 @@ POSIX_ONLY(#include <strings.h>)
 #define _EL_ADD_READ(ctx) do { \
         if ((ctx)->ev.addRead) (ctx)->ev.addRead((ctx)->ev.data); \
     } while(0)
-#ifdef _WIN32
-#define _EL_FORCE_ADD_READ(ctx) do { \
-        if ((ctx)->ev.forceAddRead) (ctx)->ev.forceAddRead((ctx)->ev.data); \
-    } while (0)
-#endif
 #define _EL_DEL_READ(ctx) do { \
         if ((ctx)->ev.delRead) (ctx)->ev.delRead((ctx)->ev.data); \
     } while(0)
@@ -135,9 +130,6 @@ static redisAsyncContext *redisAsyncInitialize(redisContext *c) {
 
     ac->ev.data = NULL;
     ac->ev.addRead = NULL;
-#ifdef _WIN32
-    ac->ev.forceAddRead = NULL;
-#endif
     ac->ev.delRead = NULL;
     ac->ev.addWrite = NULL;
     ac->ev.delWrite = NULL;
@@ -559,14 +551,11 @@ void redisAsyncHandleRead(redisAsyncContext *ac) {
         __redisAsyncDisconnect(ac);
     } else {
         /* Always re-schedule reads */
-#ifdef _WIN32
-        // There appears to be a bug in the Linux version of _EL_ADD_READ which will not reschedule
-        // the read if already reading. This is a problem if there is a large number of async GET 
-        // operations. If the receive buffer is exhausted with the data returned, the read would
-        // not be rescheduled, and the async operations would cease. This forces the read to recur.
-        _EL_FORCE_ADD_READ(ac);
-#else
         _EL_ADD_READ(ac);
+
+#ifdef _WIN32
+        /* Force a read event to be queued */
+        WSIOCP_QueueNextRead(c->fd);
 #endif
         redisProcessCallbacks(ac);
     }
