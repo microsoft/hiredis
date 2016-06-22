@@ -382,3 +382,8 @@ as soon as possible in order to prevent allocation of useless memory.
 
 Hiredis was written by Salvatore Sanfilippo (antirez at gmail) and
 Pieter Noordhuis (pcnoordhuis at gmail) and is released under the BSD license.
+
+## Code of Conduct
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
