@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 project(hiredis)
 
 option(HIREDIS_BUILD_SHARED "Build a shared library." OFF)
+option(HIREDIS_BUILD_EXAMPLE "Build the example program." OFF)
+option(HIREDIS_BUILD_TEST "Build the test program." OFF)
 
 set(SOURCES async.c hiredis.c net.c sds.c)
 
@@ -44,4 +46,14 @@ add_library(hiredis ${SOURCES})
 
 if(HIREDIS_BUILD_SHARED)
   target_compile_definitions(hiredis PRIVATE -DHIREDIS_BUILD_SHARED)
+endif()
+
+if(HIREDIS_BUILD_EXAMPLE)
+  add_executable(hiredis_example examples/example.c)
+  target_link_libraries(hiredis_example hiredis)
+endif()
+
+if(HIREDIS_BUILD_TEST)
+  add_executable(hiredis_test test.c)
+  target_link_libraries(hiredis_test hiredis)
 endif()

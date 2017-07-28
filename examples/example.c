@@ -4,6 +4,14 @@
 
 #include <hiredis.h>
 
+// collisions with winsock2.h make it difficult to define this anywhere
+#ifdef _WIN32
+struct timeval {
+  long    tv_sec;         /* seconds */
+  long    tv_usec;        /* and microseconds */
+};
+#endif
+
 int main(int argc, char **argv) {
     unsigned int j;
     redisContext *c;
