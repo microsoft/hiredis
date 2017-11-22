@@ -33,7 +33,8 @@
 #include <event.h>
 #include "../hiredis.h"
 #include "../async.h"
-
+#include "../msvs/win32_interop/win32_rfdmap.h"
+ 
 typedef struct redisLibeventEvents {
     redisAsyncContext *context;
     struct event rev, wev;
@@ -99,8 +100,8 @@ static int redisLibeventAttach(redisAsyncContext *ac, struct event_base *base) {
     ac->ev.data = e;
 
     /* Initialize and install read/write events */
-    event_set(&e->rev,c->fd,EV_READ,redisLibeventReadEvent,e);
-    event_set(&e->wev,c->fd,EV_WRITE,redisLibeventWriteEvent,e);
+    event_set(&e->rev,RFDMap::getInstance().lookupSocket(c->fd),EV_READ,redisLibeventReadEvent,e);
+    event_set(&e->wev,RFDMap::getInstance().lookupSocket(c->fd),EV_WRITE,redisLibeventWriteEvent,e);
     event_base_set(base,&e->rev);
     event_base_set(base,&e->wev);
     return REDIS_OK;

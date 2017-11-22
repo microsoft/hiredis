@@ -34,6 +34,7 @@
 #include <ae.h>
 #include "../hiredis.h"
 #include "../async.h"
+#include "../msvs/win32_interop/win32_rfdmap.h"
 
 typedef struct redisAeEvents {
     redisAsyncContext *context;
@@ -111,7 +112,7 @@ static int redisAeAttach(aeEventLoop *loop, redisAsyncContext *ac) {
     e = (redisAeEvents*)malloc(sizeof(*e));
     e->context = ac;
     e->loop = loop;
-    e->fd = c->fd;
+    e->fd = RFDMap::getInstance().lookupSocket(c->fd);
     e->reading = e->writing = 0;
 
     /* Register functions to start/stop listening for events */
