@@ -35,6 +35,7 @@
 #include <ev.h>
 #include "../hiredis.h"
 #include "../async.h"
+#include "../msvs/win32_interop/win32_rfdmap.h"
 
 typedef struct redisLibevEvents {
     redisAsyncContext *context;
@@ -139,8 +140,8 @@ static int redisLibevAttach(EV_P_ redisAsyncContext *ac) {
     ac->ev.data = e;
 
     /* Initialize read/write events */
-    ev_io_init(&e->rev,redisLibevReadEvent,c->fd,EV_READ);
-    ev_io_init(&e->wev,redisLibevWriteEvent,c->fd,EV_WRITE);
+    ev_io_init(&e->rev,redisLibevReadEvent,RFDMap::getInstance().lookupSocket(c->fd),EV_READ);
+    ev_io_init(&e->wev,redisLibevWriteEvent,RFDMap::getInstance().lookupSocket(c->fd),EV_WRITE);
     return REDIS_OK;
 }
 

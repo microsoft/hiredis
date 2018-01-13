@@ -24,6 +24,7 @@
 #define WIN32_INTEROP_WSIOCP_H
 
 #include "win32_wsiocp2.h"
+#include "..\deps\ae.h"
 
 /* structs and functions for using IOCP with windows sockets */
 
