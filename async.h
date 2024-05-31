@@ -101,27 +101,27 @@ typedef struct redisAsyncContext {
 } redisAsyncContext;
 
 /* Functions that proxy to hiredis */
-redisAsyncContext *redisAsyncConnect(const char *ip, int port);
-redisAsyncContext *redisAsyncConnectBind(const char *ip, int port, const char *source_addr);
-redisAsyncContext *redisAsyncConnectUnix(const char *path);
-int redisAsyncSetConnectCallback(redisAsyncContext *ac, redisConnectCallback *fn);
-int redisAsyncSetDisconnectCallback(redisAsyncContext *ac, redisDisconnectCallback *fn);
-void redisAsyncDisconnect(redisAsyncContext *ac);
-void redisAsyncFree(redisAsyncContext *ac);
+HIREDIS_API redisAsyncContext *redisAsyncConnect(const char *ip, int port);
+HIREDIS_API redisAsyncContext *redisAsyncConnectBind(const char *ip, int port, const char *source_addr);
+HIREDIS_API redisAsyncContext *redisAsyncConnectUnix(const char *path);
+HIREDIS_API int redisAsyncSetConnectCallback(redisAsyncContext *ac, redisConnectCallback *fn);
+HIREDIS_API int redisAsyncSetDisconnectCallback(redisAsyncContext *ac, redisDisconnectCallback *fn);
+HIREDIS_API void redisAsyncDisconnect(redisAsyncContext *ac);
+HIREDIS_API void redisAsyncFree(redisAsyncContext *ac);
 
 /* Handle read/write events */
-void redisAsyncHandleRead(redisAsyncContext *ac);
-void redisAsyncHandleWrite(redisAsyncContext *ac);
+HIREDIS_API void redisAsyncHandleRead(redisAsyncContext *ac);
+HIREDIS_API void redisAsyncHandleWrite(redisAsyncContext *ac);
 #ifdef _WIN32
-int redisAsyncHandleWritePrep(redisAsyncContext *ac);
-int redisAsyncHandleWriteComplete(redisAsyncContext *ac, int written);
+HIREDIS_API int redisAsyncHandleWritePrep(redisAsyncContext *ac);
+HIREDIS_API int redisAsyncHandleWriteComplete(redisAsyncContext *ac, int written);
 #endif
 
 /* Command functions for an async context. Write the command to the
  * output buffer and register the provided callback. */
-int redisvAsyncCommand(redisAsyncContext *ac, redisCallbackFn *fn, void *privdata, const char *format, va_list ap);
-int redisAsyncCommand(redisAsyncContext *ac, redisCallbackFn *fn, void *privdata, const char *format, ...);
-int redisAsyncCommandArgv(redisAsyncContext *ac, redisCallbackFn *fn, void *privdata, int argc, const char **argv, const size_t *argvlen);
+HIREDIS_API int redisvAsyncCommand(redisAsyncContext *ac, redisCallbackFn *fn, void *privdata, const char *format, va_list ap);
+HIREDIS_API int redisAsyncCommand(redisAsyncContext *ac, redisCallbackFn *fn, void *privdata, const char *format, ...);
+HIREDIS_API int redisAsyncCommandArgv(redisAsyncContext *ac, redisCallbackFn *fn, void *privdata, int argc, const char **argv, const size_t *argvlen);
 
 #ifdef __cplusplus
 }

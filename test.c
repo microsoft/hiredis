@@ -7,7 +7,8 @@
 #include <sys/time.h>
 #else
 #include <WinSock2.h>
-#include "../../src/Win32_Interop/Win32_Time.h"
+#include <sys/types.h>
+#include <sys/timeb.h>
 #endif
 #include <assert.h>
 #ifndef _WIN32
@@ -23,6 +24,9 @@
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 #define SIGPIPE 13
+#define IF_WIN32(yes, no) yes
+#else
+#define IF_WIN32(yes, no) no
 #endif
 
 
@@ -52,9 +56,15 @@ static int tests = 0, fails = 0;
 #define test_cond(_c) if(_c) printf("\033[0;32mPASSED\033[0;0m\n"); else {printf("\033[0;31mFAILED\033[0;0m\n"); fails++;}
 
 static long long usec(void) {
+#ifdef _WIN32
+    struct __timeb64 tb;
+    _ftime64_s(&tb);
+    return (((long long)tb.time) * 1000000) + (tb.millitm * 1000);
+#else
     struct timeval tv;
     gettimeofday(&tv,NULL);
     return (((long long)tv.tv_sec)*1000000)+tv.tv_usec;
+#endif
 }
 
 static redisContext *select_database(redisContext *c) {
